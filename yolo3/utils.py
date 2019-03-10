@@ -2,7 +2,8 @@
 
 from functools import reduce
 
-from PIL import Image
+#from PIL import Image
+import cv2
 import numpy as np
 from matplotlib.colors import rgb_to_hsv, hsv_to_rgb
 
@@ -19,16 +20,20 @@ def compose(*funcs):
 
 def letterbox_image(image, size):
     '''resize image with unchanged aspect ratio using padding'''
-    iw, ih = image.size
+    ih, iw, ic = image.shape
     w, h = size
     scale = min(w/iw, h/ih)
     nw = int(iw*scale)
     nh = int(ih*scale)
 
-    image = image.resize((nw,nh), Image.BICUBIC)
-    new_image = Image.new('RGB', size, (128,128,128))
-    new_image.paste(image, ((w-nw)//2, (h-nh)//2))
+    # image = image.resize((nw,nh), Image.BICUBIC)
+    image = cv2.resize(image, (nw,nh), cv2.INTER_CUBIC)
+    new_image = np.full((h, w, 3), 128)
+    new_image[(h-nh)//2:(h-nh)//2+nh,(w-nw)//2:(w-nw)//2+nw,:] = image
+    # new_image = Image.new('RGB', size, (128,128,128))
+    # new_image.paste(image, ((w-nw)//2, (h-nh)//2))
     return new_image
+    # return image
 
 def rand(a=0, b=1):
     return np.random.rand()*(b-a) + a
